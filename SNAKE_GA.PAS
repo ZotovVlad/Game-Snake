@@ -15,7 +15,13 @@ begin
 end;
 
 
-var key : char; n, b, coord1, coord2, k, x, y, x1, y1, radius, i : integer; color : word;
+var
+   a : array[0..100, 1..2] of integer;
+   key : char;
+   coord1, coord2, x, y, x1, y1, radius : integer;
+   k, i, j : integer;
+   b, step : integer;
+   color : word;
 
 begin
   InitGr;
@@ -27,74 +33,103 @@ begin
   Line(639, 479, 1, 479);
   Line(1, 479, 1, 1);
 
-  color := random(16) + 1;
-
-  i := 20;
-
-  x := (random(30) + 2) * 20;
-  y := (random(22) + 2) * 20;
+  step := 20;
 
   radius := 10;
+
+  key := ' ';
+
+  k := 1;
+
+  color := random(16) + 1;
 
   coord1 := (random(30) + 2) * 20;
   coord2 := (random(22) + 2) * 20;
 
+  a[1, 1] := (random(30) + 2) * 20;
+  a[1, 2] := (random(22) + 2) * 20;
 
   SetFillStyle(color, color);
   SetColor(color);
 
-  FillEllipse(x, y, radius, radius);
-
-  key := ' ';
-
-  n := 1;
+  FillEllipse(a[1, 1], a[1, 2], radius, radius);
 
   FillEllipse(coord1, coord2, radius, radius);
 
   repeat
 
-     if ((coord1 = x1) and (coord2 = y1)){ or ((x = x1) and (y = y1))} then
+    if (coord1 = a[k, 1]) and (coord2 = a[k, 2]) then
        begin
          coord1 := (random(30) + 2) * 20;
          coord2 := (random(22) + 2) * 20;
          SetFillStyle(color, color);
          SetColor(color);
          FillEllipse(coord1, coord2, radius, radius);
-         n := n + 1;
+         k := k + 1;
        end;
 
-     x1 := x;
-     y1 := y;
+    b := k;
 
-     key := readkey;
+    while k > 0 do
+    begin
+      a[k - 1, 1] := a[k, 1];
+      a[k - 1, 2] := a[k, 2];
+      k := k - 1;
+    end;
 
-     if(key = 'w') then
+    k := b;
+
+    key := readkey;
+
+    b := k;
+
+    while k > 0 do
+    begin
+
+    if(key = 'w') then
        begin
-         y := y - i;
+         a[k, 2] := a[k, 2] - step;
        end;
-     if(key = 's') then
+    if(key = 's') then
        begin
-         y := y + i;
+         a[k, 2] := a[k, 2] + step;
        end;
-     if(key = 'a') then
+    if(key = 'a') then
        begin
-         x := x - i;
+         a[k, 1] := a[k, 1] - step;
        end;
-     if(key = 'd') then
+    if(key = 'd') then
        begin
-         x := x + i;
+         a[k, 1] := a[k, 1] + step;
        end;
+    k := k - 1;
 
-     SetFillStyle(color, color);
-     SetColor(color);
+    end;
 
-     FillEllipse(x, y, radius, radius);
+    k := b;
 
-     SetFillStyle(0, 0);
-     SetColor(0);
+    while b > 0 do
+      begin
+        SetFillStyle(color, color);
+        SetColor(color);
+        FillEllipse(a[b, 1], a[b, 2], radius, radius);
+        b := b - 1;
+      end;
 
-     FillEllipse(x1, y1, radius, radius);
+    SetFillStyle(0, 0);
+    SetColor(1);
+    FillEllipse(a[k - 1, 1], a[k - 1, 2], radius, radius);
 
+    b := k;
+
+    while k > 0 do
+      begin
+        a[k + 1, 1] := a[k, 1];
+        a[k + 1, 2] := a[k, 2];
+        k := k - 1;
+      end;
+
+    k := b;
 
    until key = 'q';
 
