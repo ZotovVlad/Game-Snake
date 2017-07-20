@@ -3,13 +3,15 @@ unit UCircle;
 interface
 
 uses
-  UShape, Crt;
+    Crt;
 
 type
   TCircle = ^Circle;
   Circle = object
     x : Integer;
     y : Integer;
+
+    constructor create(valX, valY : integer);
 
     procedure setX(val : integer);
     procedure setY(val : integer);
@@ -27,7 +29,7 @@ procedure circle.setX(val : integer);
   end;
 procedure circle.setY(val : integer);
   begin
-    y := val
+    y := val;
   end;
 
 function circle.getX : integer;
@@ -39,6 +41,11 @@ function circle.getY : integer;
     getY := y;
   end;
 
+constructor circle.create(valX, valY : integer);
+  begin
+    circle.setX(valX);
+    circle.setY(valY);
+  end;
 
 begin
 end.

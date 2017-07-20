@@ -1,6 +1,6 @@
 program Snake_Game;
 
-uses Crt, Graph;
+uses Crt, Graph, UCircle;
 
 procedure InitGr;
 var
@@ -16,17 +16,26 @@ end;
 
 
 var
-   a : array[0..100, 1..2] of integer;
-   key : char;
-   coord1, coord2, x, y, x1, y1, radius : integer;
-   k, i, j : integer;
-   b, step : integer;
-   color : word;
+   userChoise : char;
+
+   snakeWidth, mealCircleRadius, snakeHeadCircleRadius : integer;
+   snakePatternStyle, mealPatternStyle : word;
+
+   step : integer;
+
+   snakeColor, mealColor : word;
+
+   borderColor : word;
+   headCoordX, headCoordY : integer;
+   mealCoordX, mealCoordY : integer;
+   pHeadCircle, pMealCircle : tCircle;
 
 begin
   InitGr;
   randomize;
-  SetColor(10);
+
+  borderColor := 10;
+  SetColor(borderColor);
 
   Line(1, 1, 639, 1);
   Line(639, 1, 639, 479);
@@ -35,29 +44,39 @@ begin
 
   step := 20;
 
-  radius := 10;
+  snakeWidth := 20;
 
-  key := ' ';
+  snakeHeadCircleRadius := round(snakeWidth / 2);
+  mealCircleRadius := snakeHeadCircleRadius;
 
-  k := 1;
+  userChoise := ' ';
 
-  color := random(16) + 1;
+  snakeColor := random(16) + 1;
+  mealColor := random(16) + 1;
+  snakePatternStyle := snakeColor;
+  mealPatternStyle := mealColor;
 
-  coord1 := (random(30) + 2) * 20;
-  coord2 := (random(22) + 2) * 20;
+  mealCoordX := (random(30) + 2) * 20;
+  mealCoordY := (random(22) + 2) * 20;
 
-  a[1, 1] := (random(30) + 2) * 20;
-  a[1, 2] := (random(22) + 2) * 20;
+  headCoordX := (random(30) + 2) * 20;
+  headCoordY := (random(22) + 2) * 20;
 
-  SetFillStyle(color, color);
-  SetColor(color);
+  pHeadCircle := new(tCircle, create(headCoordX, headCoordY));
+  pMealCircle := new(tCircle, create(mealCoordX, mealCoordY));
 
-  FillEllipse(a[1, 1], a[1, 2], radius, radius);
+  SetFillStyle(snakePatternStyle, snakeColor);
+  SetColor(snakeColor);
 
-  FillEllipse(coord1, coord2, radius, radius);
+  FillEllipse(pHeadCircle^.getX, pHeadCircle^.getY, snakeHeadCircleRadius, snakeHeadCircleRadius);
+
+  SetFillStyle(mealPatternStyle, mealColor);
+  SetColor(mealColor);
+
+  FillEllipse(pMealCircle^.getX, pMealCircle^.getY, mealCircleRadius, mealCircleRadius);
 
   repeat
-
+   {
     if (coord1 = a[k, 1]) and (coord2 = a[k, 2]) then
        begin
          coord1 := (random(30) + 2) * 20;
@@ -79,26 +98,26 @@ begin
 
     k := b;
 
-    key := readkey;
+    userChoise := readkey;
 
     b := k;
 
     while k > 0 do
     begin
 
-    if(key = 'w') then
+    if(userChoise = 'w') then
        begin
          a[k, 2] := a[k, 2] - step;
        end;
-    if(key = 's') then
+    if(userChoise = 's') then
        begin
          a[k, 2] := a[k, 2] + step;
        end;
-    if(key = 'a') then
+    if(userChoise = 'a') then
        begin
          a[k, 1] := a[k, 1] - step;
        end;
-    if(key = 'd') then
+    if(userChoise = 'd') then
        begin
          a[k, 1] := a[k, 1] + step;
        end;
@@ -130,8 +149,8 @@ begin
       end;
 
     k := b;
-
-   until key = 'q';
+                     }
+   until userChoise = 'q';
 
   CloseGraph;
 end.
