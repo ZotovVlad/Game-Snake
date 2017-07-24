@@ -1,4 +1,4 @@
-program Graph1;
+program Snake_Game;
 
 uses Crt, Graph, uTriangle;
 
@@ -145,6 +145,7 @@ var gd,gm,dx : integer;
     shiftX, shiftY, modd : integer;
     pMeal, pTriangleColor, pTriangleBlack : tTriangle;
     snakeBody : array[0..10] of tTriangle;
+    amountSegments : integer;
 begin
   clrscr;
   randomize;
@@ -174,7 +175,7 @@ begin
      (ptriangleColor^.getx1, ptriangleColor^.gety1,
       ptriangleColor^.getx2, ptriangleColor^.gety2,
       ptriangleColor^.getx3, ptriangleColor^.gety3)
-  );
+     );
 
 
   shiftX := ((random(width - sideTriangle + borderWidth) + sideTriangle) div step) * step + 2;
@@ -219,25 +220,50 @@ begin
 
   repeat
 
+    if(pMeal^.getX3 = pTriangleColor^.getX1)and
+      (pMeal^.getY3 = pTriangleColor^.getY1)and
+      (pMeal^.getX2 = pTriangleColor^.getX2)and
+      (pMeal^.getY2 = pTriangleColor^.getY2)and
+      (pMeal^.getX1 = pTriangleColor^.getX3)and
+      (pMeal^.getY1 = pTriangleColor^.getY3)
+    then
+      begin
+        pMeal^.setX1(( ((random(width - sideTriangle + borderWidth) + sideTriangle) div step) * step + 2));
+
+        pMeal^.setX2(pMeal^.getX1 - 20);
+        pMeal^.setX3(pMeal^.getX1 - 10);
+
+        pMeal^.setY1( ((random(hight - sideTriangle - borderWidth) + sideTriangle) div step) * step + 2);
+
+        pMeal^.setY2(pMeal^.getY1);
+        pMeal^.setY3(pMeal^.getY1 - 20);
+
+        color := random(15) + 1;
+
+        amountSegments := amountSegments + 1;
+
+        drawTriangle(pMeal, color);
+      end;
 
     userChoise := ReadKey;
 
-    modd := ptriangleColor^.getX1 * ptriangleColor^.getY1;
+    modd := pTriangleColor^.getX1 * pTriangleColor^.getY1;
 
     changeSound(modd);
 
 
-    copyTriangle(pTriangleColor,pTriangleBlack);
+    copyTriangle(pTriangleColor, pTriangleBlack);
 
 
-    move(userChoise,pTriangleColor,modd, delta);
+    move(userChoise, pTriangleColor, modd, delta);
+
 
     makeSound(modd, 50);
 
-    changeColor(color,ptriangleColor);
+    changeColor(color, pTriangleColor);
 
 
-    drawTriangle(pTriangleBlack,0);
+    drawTriangle(pTriangleBlack, 0);
 
     drawTriangle(pTriangleColor, color);
 
