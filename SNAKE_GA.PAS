@@ -2,6 +2,8 @@ program Snake_Game;
 
 uses Crt, Graph, uTriangle;
 
+
+
 procedure InitGr;
 var
   grDriver,grMode,ErrCode:Integer;
@@ -14,6 +16,9 @@ begin
    else Writeln('Graphics error:',GraphErrorMsg(ErrCode));
 end;
 
+
+
+
 procedure drawTriangle(pTriangle : tTriangle; col : word);
 begin
   SetColor(col);
@@ -22,52 +27,56 @@ begin
   Line(ptriangle^.getx3,ptriangle^.gety3,ptriangle^.getx1,ptriangle^.gety1);
 end;
 
-procedure move(key : string; var ptriangleColor : tTriangle;modd, delta : integer);
 
+
+
+procedure move(key : string; var ptriangle : tTriangle;modd, delta : integer);
 begin
-
     if(Key='d')then
       begin
-        ptriangleColor^.setX1(ptriangleColor^.getX1 + delta);
-        ptriangleColor^.setX2(ptriangleColor^.getX2 + delta);
-        ptriangleColor^.setX3(ptriangleColor^.getX3 + delta);
+        ptriangle^.setX1(ptriangle^.getX1 + delta);
+        ptriangle^.setX2(ptriangle^.getX2 + delta);
+        ptriangle^.setX3(ptriangle^.getX3 + delta);
       end;
     if(Key='a')then
       begin
-        ptriangleColor^.setX1(ptriangleColor^.getX1 - delta);
-        ptriangleColor^.setX2(ptriangleColor^.getX2 - delta);
-        ptriangleColor^.setX3(ptriangleColor^.getX3 - delta);
+        ptriangle^.setX1(ptriangle^.getX1 - delta);
+        ptriangle^.setX2(ptriangle^.getX2 - delta);
+        ptriangle^.setX3(ptriangle^.getX3 - delta);
       end;
     if(Key='w')then
       begin
-        ptriangleColor^.setY1(ptriangleColor^.getY1 - delta);
-        ptriangleColor^.setY2(ptriangleColor^.getY2 - delta);
-        ptriangleColor^.setY3(ptriangleColor^.getY3 - delta);
+        ptriangle^.setY1(ptriangle^.getY1 - delta);
+        ptriangle^.setY2(ptriangle^.getY2 - delta);
+        ptriangle^.setY3(ptriangle^.getY3 - delta);
       end;
     if(Key='s')then
       begin
-        ptriangleColor^.setY1(ptriangleColor^.getY1 + delta);
-        ptriangleColor^.setY2(ptriangleColor^.getY2 + delta);
-        ptriangleColor^.setY3(ptriangleColor^.getY3 + delta);
+        ptriangle^.setY1(ptriangle^.getY1 + delta);
+        ptriangle^.setY2(ptriangle^.getY2 + delta);
+        ptriangle^.setY3(ptriangle^.getY3 + delta);
       end;
-
 end;
 
 
 
 procedure changeColor(var col : word; ptriangle : ttriangle);
 begin
+
   col := ptriangle^.getx1
-  + ptriangle^.getx2
-  + ptriangle^.getx3
-  + ptriangle^.gety1
-  + ptriangle^.gety2
-  + ptriangle^.gety3;
+         + ptriangle^.getx2
+         + ptriangle^.getx3
+         + ptriangle^.gety1
+         + ptriangle^.gety2
+         + ptriangle^.gety3;
+
     if (col mod 16 = 0) then
        begin
             col := col + 4;
        end;
 end;
+
+
 
 procedure changeSound(var modd : integer);
 begin
@@ -81,6 +90,8 @@ begin
     end;
 end;
 
+
+
 procedure copyTriangle(var pTriangleDonor, pTriangleDestenation : ttriangle);
 begin
   pTriangleDestenation^.setX1(pTriangleDonor^.getX1);
@@ -91,6 +102,8 @@ begin
   pTriangleDestenation^.setY3(pTriangleDonor^.getY3);
 end;
 
+
+
 procedure makeSound(modd : Integer; millisec : Word);
 begin
   sound(modd);
@@ -98,43 +111,148 @@ begin
   nosound;
 end;
 
-function greatingUser : string;
+
+
+function greetingUser : string;
 var
-userChoise : string;
-  begin
-    writeln('Please, select triangle type from following options : ');
-    writeln('1 - acute triangle');
-    writeln('2 - right triangle');
-    writeln('3 - obtuce triangle');
+  userChoise : string;
+begin
+  writeln('Please, select triangle type from following options : ');
+  writeln('1 - acute triangle');
+  writeln('2 - right triangle');
+  writeln('3 - obtuce triangle');
 
-    readln(userChoise);
+  readln(userChoise);
 
-    greatingUser := userChoise;
-  end;
+  greetingUser := userChoise;
+end;
 
 
-function create(typeNumber : string) : tTriangle;
+
+function create(typeNumber : string;
+                shiftX, shiftY : integer
+                step : integer) : tTriangle;
 begin
 
   if(typeNumber = '1') then
     begin
-      create := new(tTriangle, create(12, 2, 2, 22, 22, 22));
+      create := new(tTriangle, create(shiftX, shiftY,
+                                      shiftX - step, shiftY,
+                                      shiftX - (step / 2) , shiftY - step));
     end
   else if(typeNumber = '2') then
     begin
-      create := new(tTriangle, create(2, 2, 22, 2, 2, 22));
+      create := new(tTriangle, create(shiftX, shiftY,
+                                      shiftX - step, shiftY,
+                                      shiftX, shiftY - step));
     end
   else if(typeNumber = '3') then
     begin
-      create := new(tTriangle, create(2, 2, 12, 22, 22, 22));
+      create := new(tTriangle, create(shiftX, shiftY,
+                                      shiftX - (step / 2), shiftY,
+                                      shiftX - step, shiftY - step));
     end
   else
     begin
       writeln('Error');
-      create := create(greatingUser);
+      create := create(typeNumber);
     end;
 
 end;
+
+
+
+procedure drawBorder(width, high, borderWidth : integer)
+begin
+  Line(1, 1, width - borderWidth, 1);
+  Line(width - borderWidth, 1, width - borderWidth, hight - borderWidth);
+  Line(width - borderWidth, hight - borderWidth, 1, hight - borderWidth);
+  Line(1, hight - borderWidth, 1, 1);
+end;
+
+
+
+function checkForHeadMealEquality(pMeal, pSnakeSegment :tTriangle;
+                                   screenWidth, screenHeight,
+                                   sideTriangle,
+                                   borderWidth,
+                                   step : integer) : boolean;
+begin
+  if(pMeal^.getX1 = pSnakeSegment^.getX1)and
+    (pMeal^.getY1 = pSnakeSegment^.getY1)and
+    (pMeal^.getX2 = pSnakeSegment^.getX2)and
+    (pMeal^.getY2 = pSnakeSegment^.getY2)and
+    (pMeal^.getX3 = pSnakeSegment^.getX3)and
+    (pMeal^.getY3 = pSnakeSegment^.getY3)
+    then
+      begin
+        checkForHeadMealEquality := true;
+      end
+    else
+      begin
+        checkForHeadMealEquality := false;
+      end;
+
+end;
+
+
+
+procedure crawl(snake : array of tTriangle;
+                key : string; modd, delta : integer)
+var
+  j, buf : integer;
+begin
+  int i := n;
+  while snake[i] = nil do
+  begin
+    i := i - 1;
+  end;
+
+  move(key, snake[i], modd, delta);
+
+  j := i - 1;
+  if (j <> n) then
+  begin
+    for j := 0 downto j do
+    begin
+      if (j <> 0)
+      begin
+        snake[j + 1] := snake[j];
+      end;
+    end;
+  end;
+
+end;
+
+
+
+procedure generateShift(var shiftX, shiftY : integer;
+                        width, hight, sideTriangle,
+                        borderWidth, step : integer)
+begin
+  shiftX := ((random(width - sideTriangle + borderWidth) + sideTriangle)
+             div step) * step + 2;
+
+  shiftY := ((random(hight - sideTriangle - borderWidth) + sideTriangle)
+             div step) * step + 2;
+end;
+
+
+
+procedure eatMeal(pMeal : tTriangle; var amountSegments : integer)
+begin
+  amountSegments := amountSegments + 1;
+  drawTriangle(pMeal, random(14) + 1);
+end;
+
+
+
+procedure drawSnake(snakeBody : array tTriangle)
+begin
+
+end;
+
+
 
 var gd,gm,dx : integer;
     delta : integer;
@@ -143,129 +261,101 @@ var gd,gm,dx : integer;
     color, borderColor : Word;
     width, hight, sideTriangle, borderWidth, step : integer;
     shiftX, shiftY, modd : integer;
-    pMeal, pTriangleColor, pTriangleBlack : tTriangle;
-    snakeBody : array[0..10] of tTriangle;
-    amountSegments : integer;
+    pMeal, pColorTriangle, pBlackTriangle : tTriangle;
+    snakeBody : array[0..100] of tTriangle;
+    amountSegments, k : integer;
+
 begin
   clrscr;
   randomize;
+  InitGr;
 
   delta := 20;
-  InitGr;
   color := 10;
   width := 640;
   hight := 480;
   sideTriangle := 21;
   borderWidth := 1;
   step := 20;
-
+  amountSegments := 0;
   borderColor := 10;
+
   SetColor(borderColor);
 
-  Line(1, 1, width - borderWidth, 1);
-  Line(width - borderWidth, 1, width - borderWidth, hight - borderWidth);
-  Line(width - borderWidth, hight - borderWidth, 1, hight - borderWidth);
-  Line(1, hight - borderWidth, 1, 1);
+  drawBorder(width, high, borderWidth);
 
-  userChoise := '1';{greatingUser;}
+  userChoise := '1';
 
-  pTriangleColor := create(userChoise);
+  {greatingUser;}
 
-  pTriangleBlack := new(tTriangle, create
-     (ptriangleColor^.getx1, ptriangleColor^.gety1,
-      ptriangleColor^.getx2, ptriangleColor^.gety2,
-      ptriangleColor^.getx3, ptriangleColor^.gety3)
+
+  generateShift(shiftX, shiftY,
+                width, hight, sideTriangle, borderWidth, step);
+
+  pColorTriangle := create(userChoise, shiftX, shiftY);
+
+  pBlackTriangle := new(tTriangle, create
+     (pColorTriangle^.getx1, pColorTriangle^.gety1,
+      pColorTriangle^.getx2, pColorTriangle^.gety2,
+      pColorTriangle^.getx3, pColorTriangle^.gety3)
      );
 
+  pMeal := create(userChoise, shiftX, shiftY);
 
-  shiftX := ((random(width - sideTriangle + borderWidth) + sideTriangle) div step) * step + 2;
+  while (checkForHeadMealEquality(pMeal, pColorTriangle, width, hight,
+                           sideTriangle, borderWidth, step)) do
+  begin
+    generateShift(shiftX, shiftY,
+                width, hight, sideTriangle, borderWidth, step);
+    pMeal := create(userChoise, shiftX, shiftY);
+  end;
 
-  shiftY := ((random(hight - sideTriangle - borderWidth) + sideTriangle) div step) * step + 2;
+  snakeBody[0] := pColorTriangle;
 
-  pMeal := new(tTriangle,
-  create(shiftX, shiftY,
-         shiftX - 20, shiftY,
-         shiftX - 10, shiftY - 20));
-  {Check for equality with head}
-
-
-  snakeBody[0] := pTriangleColor;
-
-  drawTriangle(snakeBody[0], color);
-
-  if(pMeal^.getX1 = snakeBody[0]^.getX1)and
-    (pMeal^.getY1 = snakeBody[0]^.getY1)and
-    (pMeal^.getX2 = snakeBody[0]^.getX2)and
-    (pMeal^.getY2 = snakeBody[0]^.getY2)and
-    (pMeal^.getX3 = snakeBody[0]^.getX3)and
-    (pMeal^.getY3 = snakeBody[0]^.getY3)
-    then
-      begin
-        pMeal^.setX1((pMeal^.getX1 + ((random(width - sideTriangle + borderWidth) + sideTriangle) div step) * step + 2)
-        mod 640);
-        pMeal^.setX2((pMeal^.getX2 + ((random(width - sideTriangle + borderWidth) + sideTriangle) div step) * step + 2)
-        mod 640);
-        pMeal^.setX3((pMeal^.getX3 + ((random(width - sideTriangle + borderWidth) + sideTriangle) div step) * step + 2)
-        mod 640);
-        pMeal^.setY1((pMeal^.getY1 + ((random(hight - sideTriangle - borderWidth) + sideTriangle) div step) * step + 2)
-        mod 480);
-        pMeal^.setY2((pMeal^.getY2 + ((random(hight - sideTriangle - borderWidth) + sideTriangle) div step) * step + 2)
-        mod 480);
-        pMeal^.setY3((pMeal^.getY3 + ((random(hight - sideTriangle - borderWidth) + sideTriangle) div step) * step + 2)
-        mod 480);
-      end;
+  drawTriangle(snakeBody[0], color); {todo think about}
 
   drawTriangle(pMeal, color);
 
 
   repeat
 
-    if(pMeal^.getX3 = pTriangleColor^.getX1)and
-      (pMeal^.getY3 = pTriangleColor^.getY1)and
-      (pMeal^.getX2 = pTriangleColor^.getX2)and
-      (pMeal^.getY2 = pTriangleColor^.getY2)and
-      (pMeal^.getX1 = pTriangleColor^.getX3)and
-      (pMeal^.getY1 = pTriangleColor^.getY3)
-    then
-      begin
-        pMeal^.setX1(( ((random(width - sideTriangle + borderWidth) + sideTriangle) div step) * step + 2));
-
-        pMeal^.setX2(pMeal^.getX1 - 20);
-        pMeal^.setX3(pMeal^.getX1 - 10);
-
-        pMeal^.setY1( ((random(hight - sideTriangle - borderWidth) + sideTriangle) div step) * step + 2);
-
-        pMeal^.setY2(pMeal^.getY1);
-        pMeal^.setY3(pMeal^.getY1 - 20);
-
-        color := random(15) + 1;
-
-        amountSegments := amountSegments + 1;
-
-        drawTriangle(pMeal, color);
-      end;
-
     userChoise := ReadKey;
 
-    modd := pTriangleColor^.getX1 * pTriangleColor^.getY1;
+    modd := snakeBody[amountSegments]^.getX1 *
+            snakeBody[amountSegments]^.getY1;   {todo random}
+
+    crawl(snakeBody, userChoise, modd, delta);
+
+    drawSnake(snakeBody);
+
+    if (checkForHeadMealEquality(pMeal, snakeBody,
+                             width, hight,
+                             sideTriangle,
+                             borderWidth,
+                             step))
+    then
+      begin
+        eatMeal(pMeal, amountSegments);
+      end;
+
+    k := amountSegments;
+
+
 
     changeSound(modd);
-
-
-    copyTriangle(pTriangleColor, pTriangleBlack);
-
-
-    move(userChoise, pTriangleColor, modd, delta);
-
-
     makeSound(modd, 50);
 
-    changeColor(color, pTriangleColor);
+    changeColor(color, snakeBody[amountSegments]);
 
+    drawTriangle(snakeBody[-1], 0);
 
-    drawTriangle(pTriangleBlack, 0);
-
-    drawTriangle(pTriangleColor, color);
+    k := amountSegments;
+    while amountSegments > -1 do
+      begin
+        drawTriangle(snakeBody[amountSegments], color);
+        amountSegments := amountSegments - 1;
+      end;
+    amountSegments := k;
 
   until userChoise='q';
 
