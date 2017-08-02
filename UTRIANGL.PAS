@@ -8,10 +8,12 @@ type
   Triangle = object
   private x1, x2, x3 : integer;
   private y1, y2, y3 : integer;
+  private color : word;
 
   public
 
-  constructor create(valX1,valY1,valX2,valY2,valX3,valY3 : integer);
+  constructor create(valX1,valY1,valX2,valY2,valX3,valY3 : integer;
+                     valColor : word);
 
   function getX1 : integer;
   function getY1 : integer;
@@ -19,6 +21,7 @@ type
   function getY2 : integer;
   function getX3 : integer;
   function getY3 : integer;
+  function getColor : word;
 
   procedure setX1(val : integer);
   procedure setY1(val : integer);
@@ -26,6 +29,7 @@ type
   procedure setY2(val : integer);
   procedure setX3(val : integer);
   procedure setY3(val : integer);
+  procedure setColor(val : word);
 
 end;
 
@@ -33,7 +37,8 @@ implementation
 
 constructor triangle.create(valX1,valY1,
                             valX2,valY2,
-                            valX3,valY3 : integer);
+                            valX3,valY3 : integer;
+                            valColor : word);
 begin
   triangle.setX1(valX1);
   triangle.setY1(valY1);
@@ -41,6 +46,7 @@ begin
   triangle.setY2(valY2);
   triangle.setX3(valX3);
   triangle.setY3(valY3);
+  triangle.setColor(valColor);
 end;
 
 procedure triangle.setX1(val : integer);
@@ -73,6 +79,11 @@ begin
   y3 := val;
 end;
 
+procedure triangle.setColor(val : word);
+begin
+  color := val;
+end;
+
 
 function triangle.getX1 : integer;
 begin
@@ -102,6 +113,11 @@ end;
 function triangle.getY3 : integer;
 begin
   getY3 := y3;
+end;
+
+function triangle.getColor : word;
+begin
+  getColor := color;
 end;
 
 begin

@@ -60,34 +60,9 @@ end;
 
 
 
-procedure changeColor(var col : word; ptriangle : ttriangle);
+procedure changeColor(var color : word; pTriangle : tTriangle);
 begin
-
-  col := ptriangle^.getx1
-         + ptriangle^.getx2
-         + ptriangle^.getx3
-         + ptriangle^.gety1
-         + ptriangle^.gety2
-         + ptriangle^.gety3;
-
-    if (col mod 16 = 0) then
-       begin
-            col := col + 4;
-       end;
-end;
-
-
-
-procedure changeSound(var modd : integer);
-begin
-  if (modd > 350) then
-    begin
-      modd := modd mod 350;
-    end;
-    if (modd < 200) then
-    begin
-      modd := 284;
-    end;
+  color := random(14) + 1;
 end;
 
 
@@ -130,39 +105,45 @@ end;
 
 
 function create(typeNumber : string;
-                shiftX, shiftY : integer
-                step : integer) : tTriangle;
+                shiftX, shiftY : integer;
+                step : integer;
+                color : word) : tTriangle;
 begin
 
   if(typeNumber = '1') then
     begin
       create := new(tTriangle, create(shiftX, shiftY,
                                       shiftX - step, shiftY,
-                                      shiftX - (step / 2) , shiftY - step));
+                                      shiftX - round(step / 2) ,
+                                      shiftY - step,
+                                      color));
     end
   else if(typeNumber = '2') then
     begin
       create := new(tTriangle, create(shiftX, shiftY,
                                       shiftX - step, shiftY,
-                                      shiftX, shiftY - step));
+                                      shiftX, shiftY - step,
+                                      color));
     end
   else if(typeNumber = '3') then
     begin
       create := new(tTriangle, create(shiftX, shiftY,
-                                      shiftX - (step / 2), shiftY,
-                                      shiftX - step, shiftY - step));
+                                      shiftX - round(step / 2),
+                                      shiftY,
+                                      shiftX - step, shiftY - step,
+                                      color));
     end
   else
     begin
       writeln('Error');
-      create := create(typeNumber);
+      create := create(typeNumber, shiftX, shiftY, step, color);
     end;
 
 end;
 
 
 
-procedure drawBorder(width, high, borderWidth : integer)
+procedure drawBorder(width, hight, borderWidth : integer);
 begin
   Line(1, 1, width - borderWidth, 1);
   Line(width - borderWidth, 1, width - borderWidth, hight - borderWidth);
@@ -198,11 +179,12 @@ end;
 
 
 procedure crawl(snake : array of tTriangle;
-                key : string; modd, delta : integer)
+                key : string; modd, delta : integer);
 var
-  j, buf : integer;
+  j, buf, i, n : integer;
 begin
-  int i := n;
+  n := high(snake) - low(snake) + 1;
+  i := n;
   while snake[i] = nil do
   begin
     i := i - 1;
@@ -211,11 +193,12 @@ begin
   move(key, snake[i], modd, delta);
 
   j := i - 1;
+
   if (j <> n) then
   begin
     for j := 0 downto j do
     begin
-      if (j <> 0)
+      if (j <> 0) then
       begin
         snake[j + 1] := snake[j];
       end;
@@ -228,7 +211,7 @@ end;
 
 procedure generateShift(var shiftX, shiftY : integer;
                         width, hight, sideTriangle,
-                        borderWidth, step : integer)
+                        borderWidth, step : integer);
 begin
   shiftX := ((random(width - sideTriangle + borderWidth) + sideTriangle)
              div step) * step + 2;
@@ -239,17 +222,34 @@ end;
 
 
 
-procedure eatMeal(pMeal : tTriangle; var amountSegments : integer)
+procedure eatMeal(pMeal : tTriangle;
+                  snake : array of tTriangle;
+                  var amountSegments : integer);
 begin
   amountSegments := amountSegments + 1;
-  drawTriangle(pMeal, random(14) + 1);
+  snake[amountSegments] := pMeal;
 end;
 
 
 
-procedure drawSnake(snakeBody : array tTriangle)
-begin
+procedure drawSnake(snakeBody : array of tTriangle);
+var
+  j, buf, i, n : integer;
 
+begin
+  n := high(snakeBody) - low(snakeBody) + 1;
+  i := n;
+
+  while snakeBody[i - 1] = nil do
+  begin
+    i := i - 1;
+  end;
+
+  while (i >= 0) do
+  begin
+    drawTriangle(snakeBody[i - 1], snakeBody[i - 1]^.getColor);
+    i := i - 1;
+  end;
 end;
 
 
@@ -258,12 +258,13 @@ var gd,gm,dx : integer;
     delta : integer;
     userChoise : string;
     FillInfo : FillSettingsType;
-    color, borderColor : Word;
+    color, borderColor, blackColor : Word;
     width, hight, sideTriangle, borderWidth, step : integer;
     shiftX, shiftY, modd : integer;
     pMeal, pColorTriangle, pBlackTriangle : tTriangle;
     snakeBody : array[0..100] of tTriangle;
     amountSegments, k : integer;
+    minNormalSound, maxNormalSound : integer;
 
 begin
   clrscr;
@@ -272,6 +273,7 @@ begin
 
   delta := 20;
   color := 10;
+  blackColor := 0;
   width := 640;
   hight := 480;
   sideTriangle := 21;
@@ -279,10 +281,12 @@ begin
   step := 20;
   amountSegments := 0;
   borderColor := 10;
+  minNormalSound := 200;
+  maxNormalSound := 400;
 
   SetColor(borderColor);
 
-  drawBorder(width, high, borderWidth);
+  drawBorder(width, hight, borderWidth);
 
   userChoise := '1';
 
@@ -292,27 +296,30 @@ begin
   generateShift(shiftX, shiftY,
                 width, hight, sideTriangle, borderWidth, step);
 
-  pColorTriangle := create(userChoise, shiftX, shiftY);
+  pColorTriangle := create(userChoise, shiftX, shiftY, step, color);
 
   pBlackTriangle := new(tTriangle, create
      (pColorTriangle^.getx1, pColorTriangle^.gety1,
       pColorTriangle^.getx2, pColorTriangle^.gety2,
-      pColorTriangle^.getx3, pColorTriangle^.gety3)
+      pColorTriangle^.getx3, pColorTriangle^.gety3,
+      blackColor)
      );
 
-  pMeal := create(userChoise, shiftX, shiftY);
+  pMeal := create(userChoise, shiftX, shiftY, step, color);
 
   while (checkForHeadMealEquality(pMeal, pColorTriangle, width, hight,
                            sideTriangle, borderWidth, step)) do
-  begin
-    generateShift(shiftX, shiftY,
-                width, hight, sideTriangle, borderWidth, step);
-    pMeal := create(userChoise, shiftX, shiftY);
-  end;
+    begin
+      generateShift(shiftX, shiftY,
+                  width, hight, sideTriangle, borderWidth, step);
+      pMeal := create(userChoise, shiftX, shiftY, step, color);
+    end;
 
-  snakeBody[0] := pColorTriangle;
+  snakeBody[amountSegments] := pBlackTriangle;
+  amountSegments := amountSegments + 1;
+  snakeBody[amountSegments] := pColorTriangle;
 
-  drawTriangle(snakeBody[0], color); {todo think about}
+  drawTriangle(snakeBody[amountSegments], color); {todo think about}
 
   drawTriangle(pMeal, color);
 
@@ -321,41 +328,27 @@ begin
 
     userChoise := ReadKey;
 
-    modd := snakeBody[amountSegments]^.getX1 *
-            snakeBody[amountSegments]^.getY1;   {todo random}
+    modd := random(maxNormalSound - minNormalSound) + minNormalSound;
 
     crawl(snakeBody, userChoise, modd, delta);
 
-    drawSnake(snakeBody);
-
-    if (checkForHeadMealEquality(pMeal, snakeBody,
+    if (checkForHeadMealEquality(pMeal, pColorTriangle{snakeBody},
                              width, hight,
                              sideTriangle,
                              borderWidth,
                              step))
-    then
-      begin
-        eatMeal(pMeal, amountSegments);
-      end;
+      then
+        begin
+          eatMeal(pMeal, snakeBody, amountSegments);
 
-    k := amountSegments;
+          pMeal := create(userChoise, shiftX, shiftY, step, color);
+        end;
 
-
-
-    changeSound(modd);
     makeSound(modd, 50);
 
     changeColor(color, snakeBody[amountSegments]);
 
-    drawTriangle(snakeBody[-1], 0);
-
-    k := amountSegments;
-    while amountSegments > -1 do
-      begin
-        drawTriangle(snakeBody[amountSegments], color);
-        amountSegments := amountSegments - 1;
-      end;
-    amountSegments := k;
+    drawSnake(snakeBody);
 
   until userChoise='q';
 
