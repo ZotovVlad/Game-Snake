@@ -69,6 +69,10 @@ end;
 
 procedure copyTriangle(var pTriangleDonor, pTriangleDestenation : ttriangle);
 begin
+  if (pTriangleDestenation = nil) then
+  begin
+     pTriangleDestenation := new(tTriangle, createEmpty);
+  end;
   pTriangleDestenation^.setX1(pTriangleDonor^.getX1);
   pTriangleDestenation^.setX2(pTriangleDonor^.getX2);
   pTriangleDestenation^.setX3(pTriangleDonor^.getX3);
@@ -110,35 +114,11 @@ function create(typeNumber : string;
                 color : word) : tTriangle;
 begin
 
-  if(typeNumber = '1') then
-    begin
-      create := new(tTriangle, create(shiftX, shiftY,
-                                      shiftX - step, shiftY,
-                                      shiftX - round(step / 2) ,
-                                      shiftY - step,
-                                      color));
-    end
-  else if(typeNumber = '2') then
-    begin
-      create := new(tTriangle, create(shiftX, shiftY,
-                                      shiftX - step, shiftY,
-                                      shiftX, shiftY - step,
-                                      color));
-    end
-  else if(typeNumber = '3') then
-    begin
-      create := new(tTriangle, create(shiftX, shiftY,
-                                      shiftX - round(step / 2),
-                                      shiftY,
-                                      shiftX - step, shiftY - step,
-                                      color));
-    end
-  else
-    begin
-      writeln('Error');
-      create := create(typeNumber, shiftX, shiftY, step, color);
-    end;
-
+   create := new(tTriangle, create(shiftX, shiftY,
+                                   shiftX - step, shiftY,
+                                   shiftX - round(step / 2),
+                                   shiftY - step,
+                                   color));
 end;
 
 
@@ -177,31 +157,53 @@ begin
 end;
 
 
+function snakeBodySize(snakeBody : array of tTriangle) : integer;
+begin
+  snakeBodySize := high(snakeBody) - low(snakeBody) + 1;
+end;
+
 
 procedure crawl(snake : array of tTriangle;
                 key : string; modd, delta : integer);
 var
-  j, buf, i, n : integer;
+  j, i, n, k: integer;
+  bufTriangle, bufTriangle2 : tTriangle;
 begin
-  n := high(snake) - low(snake) + 1;
+  n := snakeBodySize(snake);
   i := n;
-  while snake[i] = nil do
+  bufTriangle := nil;
+  bufTriangle2 := nil;
+
+  while ((i <> 0) and (snake[i - 1] = nil)) do
   begin
     i := i - 1;
   end;
 
-  move(key, snake[i], modd, delta);
 
-  j := i - 1;
-
-  if (j <> n) then
+  if (i <> n) then { is snake full? }
   begin
-    for j := 0 downto j do
+    j := i - 1;
+    for k := j downto 0 do
     begin
-      if (j <> 0) then
-      begin
-        snake[j + 1] := snake[j];
-      end;
+{      if (k <> 0) then
+      begin            }
+        if (bufTriangle = nil) then
+        begin
+          copyTriangle(snake[k], bufTriangle);
+{          bufTriangle := snake[k];            }
+          move(key, snake[k], modd, delta);
+        end
+        else begin
+          copyTriangle(snake[k], bufTriangle2);
+{          bufTriangle2 := snake[k];}
+          copyTriangle(bufTriangle, snake[k]);
+{          snake[k] := bufTriangle;            }
+{          move(key, snake[k], modd, delta);}
+          copyTriangle(bufTriangle2, bufTriangle);
+{          bufTriangle := bufTriangle2;}
+        end;
+
+{      end; }
     end;
   end;
 
@@ -237,7 +239,7 @@ var
   j, buf, i, n : integer;
 
 begin
-  n := high(snakeBody) - low(snakeBody) + 1;
+  n := snakeBodySize(snakeBody);
   i := n;
 
   while snakeBody[i - 1] = nil do
@@ -245,7 +247,7 @@ begin
     i := i - 1;
   end;
 
-  while (i >= 0) do
+  while (i - 1 >= 0) do
   begin
     drawTriangle(snakeBody[i - 1], snakeBody[i - 1]^.getColor);
     i := i - 1;
@@ -256,6 +258,7 @@ end;
 
 var gd,gm,dx : integer;
     delta : integer;
+    millisec : integer;
     userChoise : string;
     FillInfo : FillSettingsType;
     color, borderColor, blackColor : Word;
@@ -283,11 +286,11 @@ begin
   borderColor := 10;
   minNormalSound := 200;
   maxNormalSound := 400;
+  millisec := 50;
 
   SetColor(borderColor);
 
   drawBorder(width, hight, borderWidth);
-
   userChoise := '1';
 
   {greatingUser;}
@@ -307,8 +310,10 @@ begin
 
   pMeal := create(userChoise, shiftX, shiftY, step, color);
 
+  {todo. first run always equals. fix that!!}
   while (checkForHeadMealEquality(pMeal, pColorTriangle, width, hight,
-                           sideTriangle, borderWidth, step)) do
+                           sideTriangle, borderWidth, step)
+                           ) do
     begin
       generateShift(shiftX, shiftY,
                   width, hight, sideTriangle, borderWidth, step);
@@ -319,6 +324,7 @@ begin
   amountSegments := amountSegments + 1;
   snakeBody[amountSegments] := pColorTriangle;
 
+ { drawSnake(snakeBody);}
   drawTriangle(snakeBody[amountSegments], color); {todo think about}
 
   drawTriangle(pMeal, color);
@@ -330,7 +336,14 @@ begin
 
     modd := random(maxNormalSound - minNormalSound) + minNormalSound;
 
+{    move(userChoise, pColorTriangle, modd, delta);}
+
     crawl(snakeBody, userChoise, modd, delta);
+
+    {if (snakeBodySize(snakeBody) = 1) then
+    begin
+      snakeBody
+    end;   }
 
     if (checkForHeadMealEquality(pMeal, pColorTriangle{snakeBody},
                              width, hight,
@@ -344,7 +357,7 @@ begin
           pMeal := create(userChoise, shiftX, shiftY, step, color);
         end;
 
-    makeSound(modd, 50);
+    makeSound(modd, millisec);
 
     changeColor(color, snakeBody[amountSegments]);
 

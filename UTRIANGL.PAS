@@ -12,6 +12,7 @@ type
 
   public
 
+  constructor createEmpty;
   constructor create(valX1,valY1,valX2,valY2,valX3,valY3 : integer;
                      valColor : word);
 
@@ -34,6 +35,11 @@ type
 end;
 
 implementation
+
+constructor triangle.createEmpty;
+begin
+
+end;
 
 constructor triangle.create(valX1,valY1,
                             valX2,valY2,
