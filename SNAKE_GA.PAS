@@ -133,11 +133,7 @@ end;
 
 
 
-function checkForHeadMealEquality(pMeal, pSnakeSegment :tTriangle;
-                                   screenWidth, screenHeight,
-                                   sideTriangle,
-                                   borderWidth,
-                                   step : integer) : boolean;
+function checkForHeadMealEquality(pMeal, pSnakeSegment :tTriangle) : boolean;
 begin
   if(pMeal^.getX1 = pSnakeSegment^.getX1)and
     (pMeal^.getY1 = pSnakeSegment^.getY1)and
@@ -185,25 +181,19 @@ begin
     j := i - 1;
     for k := j downto 0 do
     begin
-{      if (k <> 0) then
-      begin            }
-        if (bufTriangle = nil) then
-        begin
-          copyTriangle(snake[k], bufTriangle);
-{          bufTriangle := snake[k];            }
-          move(key, snake[k], modd, delta);
-        end
-        else begin
-          copyTriangle(snake[k], bufTriangle2);
-{          bufTriangle2 := snake[k];}
-          copyTriangle(bufTriangle, snake[k]);
-{          snake[k] := bufTriangle;            }
-{          move(key, snake[k], modd, delta);}
-          copyTriangle(bufTriangle2, bufTriangle);
-{          bufTriangle := bufTriangle2;}
-        end;
+      if (bufTriangle = nil) then
+      begin
+        copyTriangle(snake[k], bufTriangle);
+        move(key, snake[k], modd, delta);
+      end
+      else begin
+        copyTriangle(snake[k], bufTriangle2);
 
-{      end; }
+        copyTriangle(bufTriangle, snake[k]);
+
+        copyTriangle(bufTriangle2, bufTriangle);
+
+      end;
     end;
   end;
 
@@ -225,7 +215,7 @@ end;
 
 
 procedure eatMeal(pMeal : tTriangle;
-                  snake : array of tTriangle;
+                  var snake : array of tTriangle;
                   var amountSegments : integer);
 begin
   amountSegments := amountSegments + 1;
@@ -311,9 +301,7 @@ begin
   pMeal := create(userChoise, shiftX, shiftY, step, color);
 
   {todo. first run always equals. fix that!!}
-  while (checkForHeadMealEquality(pMeal, pColorTriangle, width, hight,
-                           sideTriangle, borderWidth, step)
-                           ) do
+  while (checkForHeadMealEquality(pMeal, pColorTriangle))do
     begin
       generateShift(shiftX, shiftY,
                   width, hight, sideTriangle, borderWidth, step);
@@ -324,7 +312,6 @@ begin
   amountSegments := amountSegments + 1;
   snakeBody[amountSegments] := pColorTriangle;
 
- { drawSnake(snakeBody);}
   drawTriangle(snakeBody[amountSegments], color); {todo think about}
 
   drawTriangle(pMeal, color);
@@ -336,25 +323,19 @@ begin
 
     modd := random(maxNormalSound - minNormalSound) + minNormalSound;
 
-{    move(userChoise, pColorTriangle, modd, delta);}
-
     crawl(snakeBody, userChoise, modd, delta);
 
-    {if (snakeBodySize(snakeBody) = 1) then
-    begin
-      snakeBody
-    end;   }
 
-    if (checkForHeadMealEquality(pMeal, pColorTriangle{snakeBody},
-                             width, hight,
-                             sideTriangle,
-                             borderWidth,
-                             step))
+    if (checkForHeadMealEquality(pMeal, pColorTriangle))
       then
         begin
           eatMeal(pMeal, snakeBody, amountSegments);
 
+          generateShift(shiftX, shiftY,
+                width, hight, sideTriangle, borderWidth, step);
+
           pMeal := create(userChoise, shiftX, shiftY, step, color);
+          drawTriangle(pMeal, color);
         end;
 
     makeSound(modd, millisec);
