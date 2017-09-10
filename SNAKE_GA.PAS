@@ -257,6 +257,7 @@ var gd,gm,dx : integer;
     snakeBody : array[0..100] of tTriangle;
     amountSegments, k : integer;
     minNormalSound, maxNormalSound : integer;
+    isAte : boolean;
 
 begin
   clrscr;
@@ -322,7 +323,14 @@ begin
 
     modd := random(maxNormalSound - minNormalSound) + minNormalSound;
 
-    crawl(snakeBody, userChoise, modd, delta);
+    if (not isAte) then
+    begin
+      crawl(snakeBody, userChoise, modd, delta);
+    end else
+    begin
+      move(userChoise, snakeBody[amountSegments], modd, delta);
+      isAte := false;
+    end;
 
 
     if (checkForHeadMealEquality(pMeal, snakeBody[amountSegments]))
@@ -330,7 +338,8 @@ begin
         begin
 
           eatMeal(pMeal, snakeBody, amountSegments);
-          move(userChoise, pMeal, modd, delta);
+          isAte := true;
+          {move(userChoise, pMeal, modd, delta);}
 
           generateShift(shiftX, shiftY,
                 width, hight, sideTriangle, borderWidth, step);
@@ -344,6 +353,7 @@ begin
     changeColor(color, snakeBody[amountSegments]);
 
     drawSnake(snakeBody);
+
 
   until userChoise='q';
 
