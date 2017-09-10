@@ -108,8 +108,7 @@ end;
 
 
 
-function create(typeNumber : string;
-                shiftX, shiftY : integer;
+function create(shiftX, shiftY : integer;
                 step : integer;
                 color : word) : tTriangle;
 begin
@@ -239,8 +238,8 @@ begin
 
   while (i - 1 >= 0) do
   begin
-    drawTriangle(snakeBody[i - 1], snakeBody[i - 1]^.getColor);
     i := i - 1;
+    drawTriangle(snakeBody[i], snakeBody[i]^.getColor);
   end;
 end;
 
@@ -289,7 +288,7 @@ begin
   generateShift(shiftX, shiftY,
                 width, hight, sideTriangle, borderWidth, step);
 
-  pColorTriangle := create(userChoise, shiftX, shiftY, step, color);
+  pColorTriangle := create(shiftX, shiftY, step, color);
 
   pBlackTriangle := new(tTriangle, create
      (pColorTriangle^.getx1, pColorTriangle^.gety1,
@@ -298,14 +297,14 @@ begin
       blackColor)
      );
 
-  pMeal := create(userChoise, shiftX, shiftY, step, color);
+  pMeal := create(shiftX, shiftY, step, color);
 
   {todo. first run always equals. fix that!!}
   while (checkForHeadMealEquality(pMeal, pColorTriangle))do
     begin
       generateShift(shiftX, shiftY,
                   width, hight, sideTriangle, borderWidth, step);
-      pMeal := create(userChoise, shiftX, shiftY, step, color);
+      pMeal := create(shiftX, shiftY, step, color);
     end;
 
   snakeBody[amountSegments] := pBlackTriangle;
@@ -326,15 +325,17 @@ begin
     crawl(snakeBody, userChoise, modd, delta);
 
 
-    if (checkForHeadMealEquality(pMeal, pColorTriangle))
+    if (checkForHeadMealEquality(pMeal, snakeBody[amountSegments]))
       then
         begin
+
           eatMeal(pMeal, snakeBody, amountSegments);
+          move(userChoise, pMeal, modd, delta);
 
           generateShift(shiftX, shiftY,
                 width, hight, sideTriangle, borderWidth, step);
 
-          pMeal := create(userChoise, shiftX, shiftY, step, color);
+          pMeal := create(shiftX, shiftY, step, color);
           drawTriangle(pMeal, color);
         end;
 
